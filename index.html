@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiplication Master</title>
+  <style>
+    :root {
+      --primary: #87CEEB; /* Sky Blue */
+      --primary-dark: #4682B4; /* Steel Blue */
+      --secondary: #00BFFF; /* Deep Sky Blue */
+      --background: #121212;
+      --surface: #1e1e1e;
+      --surface-variant: #2d2d2d;
+      --error: #cf6679;
+      --on-primary: #000000;
+      --on-secondary: #000000;
+      --on-background: #ffffff;
+      --on-surface: #ffffff;
+      --on-error: #000000;
+      --primary-text: rgba(255, 255, 255, 0.87);
+      --secondary-text: rgba(255, 255, 255, 0.6);
+      --disabled-text: rgba(255, 255, 255, 0.38);
+      --primary-shadow: rgba(0, 0, 0, 0.4);
+    }
+
+    @font-face {
+      font-family: "SF Pro Text";
+      src: local("SF Pro Text"), local("SFProText-Regular");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      font-family: "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--on-background);
+      height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+      font-weight: 500;
+    }
+
+    #root {
+      height: 100%;
+      width: 100%;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background-color: var(--primary-dark);
+      color: var(--on-primary);
+      box-shadow: 0 2px 8px var(--primary-shadow);
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: white;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .card {
+      background-color: var(--surface);
+      color: var(--on-surface);
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
+    }
+
+    .question-container {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 32px;
+    }
+
+    .question {
+      margin-bottom: 16px;
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .user-input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .input-field {
+      padding: 16px;
+      font-size: 24px;
+      width: 200px;
+      text-align: center;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      background-color: var(--surface-variant);
+      color: var(--on-surface);
+      margin-bottom: 16px;
+      font-weight: bold;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.3);
+    }
+
+    .button {
+      padding: 14px 26px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .button-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .button-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      margin-left: 8px;
+    }
+
+    .button-secondary:hover {
+      background-color: rgba(135, 206, 235, 0.1);
+    }
+
+    .button-danger {
+      background-color: var(--error);
+      color: var(--on-error);
+    }
+
+    .button-danger:hover {
+      background-color: #e05a6d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background-color: var(--surface-variant);
+      color: var(--on-surface);
+      border-radius: 12px;
+      padding: 16px;
+      width: 30%;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--secondary-text);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .feedback {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 16px;
+      height: 32px;
+    }
+
+    .feedback.correct {
+      color: #4caf50;
+    }
+
+    .feedback.incorrect {
+      color: var(--error);
+    }
+
+    .history-list {
+      list-style: none;
+      width: 100%;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 500;
+    }
+
+    .history-question {
+      font-weight: 600;
+    }
+
+    .history-answer {
+      margin-left: 16px;
+      font-weight: 500;
+    }
+
+    .correct {
+      color: #4caf50;
+    }
+
+    .incorrect {
+      color: var(--error);
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 350px;
+      margin-top: 24px;
+      padding: 16px;
+      background-color: var(--surface-variant);
+      border-radius: 8px;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-10px); }
+      80% { transform: translateX(10px); }
+      100% { transform: translateX(0); }
+    }
+
+    .tab-container {
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-button {
+      padding: 14px 26px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--secondary-text);
+      position: relative;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-button.active {
+      color: var(--primary);
+    }
+
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--primary);
+    }
+
+    .tab-content {
+      padding: 24px 0;
+    }
+    
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--primary-text);
+    }
+
+    h2 {
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .stats {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .stat-card {
+        width: 100%;
+      }
+
+      .question {
+        font-size: 42px;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+<script>
+let attempted = 0;
+let correct = 0;
+
+document.getElementById("submitBtn").addEventListener("click", submitAnswer);
+
+function submitAnswer() {
+  const selected = document.querySelector('input[name="option"]:checked');
+  if (!selected) {
+    alert("Please select an option!");
+    return;
+  }
+
+  attempted++; // ✅ Count only here
+  const isCorrect = selected.value === "correct"; // Assuming value="correct" is for the right answer
+
+  if (isCorrect) {
+    correct++;
+    alert("🎉 Correct!");
+  } else {
+    alert("❌ Wrong answer.");
+  }
+
+  updateStats();
+  loadNextQuestion(); // Assuming this moves to the next question
+}
+
+function updateStats() {
+  document.getElementById("attemptedCount").textContent = attempted;
+  document.getElementById("correctCount").textContent = correct;
+}
+</script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // App component
+    const App = () => {
+      const [multiplier, setMultiplier] = useState(null);
+      const [multiplicand, setMultiplicand] = useState(null);
+      const [userAnswer, setUserAnswer] = useState('');
+      const [score, setScore] = useState(() => {
+        const savedScore = localStorage.getItem('multiplicationMaster_score');
+        return savedScore ? parseInt(savedScore, 10) : 0;
+      });
+      const [totalQuestions, setTotalQuestions] = useState(() => {
+        const savedTotal = localStorage.getItem('multiplicationMaster_totalQuestions');
+        return savedTotal ? parseInt(savedTotal, 10) : 0;
+      });
+      const [feedback, setFeedback] = useState('');
+      const [feedbackClass, setFeedbackClass] = useState('');
+      const [startTime, setStartTime] = useState(null);
+      const [averageTime, setAverageTime] = useState(() => {
+        const savedAvgTime = localStorage.getItem('multiplicationMaster_averageTime');
+        return savedAvgTime ? parseFloat(savedAvgTime) : 0;
+      });
+      const [history, setHistory] = useState(() => {
+        const savedHistory = localStorage.getItem('multiplicationMaster_history');
+        return savedHistory ? JSON.parse(savedHistory) : [];
+      });
+      const [activeTab, setActiveTab] = useState('game');
+      const [isGameStarted, setIsGameStarted] = useState(false);
+      const [chartInstance, setChartInstance] = useState(null);
+      const chartRef = useRef(null);
+      const inputRef = useRef(null);
+
+      // Save data to localStorage
+      useEffect(() => {
+        localStorage.setItem('multiplicationMaster_score', score);
+        localStorage.setItem('multiplicationMaster_totalQuestions', totalQuestions);
+        localStorage.setItem('multiplicationMaster_averageTime', averageTime);
+        localStorage.setItem('multiplicationMaster_history', JSON.stringify(history));
+      }, [score, totalQuestions, averageTime, history]);
+
+      // Generate a new question
+      const generateQuestion = () => {
+        // Get a random multiplier (12-29 excluding 20)
+        let newMultiplier;
+        do {
+          newMultiplier = Math.floor(Math.random() * 18) + 12;
+        } while (newMultiplier === 20);
+
+        // Get a random multiplicand (2-9)
+        const newMultiplicand = Math.floor(Math.random() * 8) + 2;
+
+        setMultiplier(newMultiplier);
+        setMultiplicand(newMultiplicand);
+        setUserAnswer('');
+        setFeedback('');
+        setFeedbackClass('');
+        setStartTime(Date.now());
+        
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      };
+
+      // Start the game
+      const startGame = () => {
+        setIsGameStarted(true);
+        // Don't reset score and history - only generate a new question
+        generateQuestion();
+      };
+
+      // End the game
+      const endGame = () => {
+        setIsGameStarted(false);
+        setMultiplier(null);
+        setMultiplicand(null);
+        setUserAnswer('');
+        updateChart();
+      };
+
+      // Reset all stats
+      const resetStats = () => {
+        if (window.confirm('Are you sure you want to reset all your stats and history?')) {
+          setScore(0);
+          setTotalQuestions(0);
+          setAverageTime(0);
+          setHistory([]);
+          localStorage.removeItem('multiplicationMaster_score');
+          localStorage.removeItem('multiplicationMaster_totalQuestions');
+          localStorage.removeItem('multiplicationMaster_averageTime');
+          localStorage.removeItem('multiplicationMaster_history');
+        }
+      };
+
+      // Check the user's answer
+      const checkAnswer = () => {
+        const correctAnswer = multiplier * multiplicand;
+        const userNum = parseInt(userAnswer, 10);
+        const isCorrect = userNum === correctAnswer;
+        const endTime = Date.now();
+        const timeTaken = (endTime - startTime) / 1000; // in seconds
+
+        // Update stats
+        setTotalQuestions(prev => prev + 1);
+        if (isCorrect) {
+          setScore(prev => prev + 1); // Now correctly gives only 1 point
+          setFeedback('Correct!');
+          setFeedbackClass('correct fade-in');
+        } else {
+          setFeedback(`Incorrect. The answer is ${correctAnswer}.`);
+          setFeedbackClass('incorrect shake');
+        }
+
+        // Update average time
+        setAverageTime(prev => 
+          (prev * (totalQuestions) + timeTaken) / (totalQuestions + 1)
+        );
+
+        // Create new history item
+        const newHistoryItem = {
+          question: `${multiplier} × ${multiplicand}`,
+          userAnswer: userNum,
+          correctAnswer,
+          timeTaken,
+          isCorrect,
+          timestamp: new Date().toLocaleString()
+        };
+        
+        // Check if this exact question already exists in history
+        const questionExists = history.some(item => 
+          item.question === newHistoryItem.question && 
+          item.userAnswer === newHistoryItem.userAnswer && 
+          item.correctAnswer === newHistoryItem.correctAnswer
+        );
+
+        // Only add to history if it's not a duplicate
+        if (!questionExists) {
+          setHistory(prev => [newHistoryItem, ...prev]);
+        }
+
+        // Generate a new question after a delay
+        setTimeout(() => {
+          generateQuestion();
+        }, 1500);
+      };
+
+      // Handle input change
+      const handleInputChange = (e) => {
+        const value = e.target.value;
+        // Only allow numbers
+        if (/^\d*$/.test(value)) {
+          setUserAnswer(value);
+        }
+      };
+
+      // Handle form submission
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (userAnswer) {
+          checkAnswer();
+        }
+      };
+
+      // Handle keydown
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && userAnswer) {
+          checkAnswer();
+        }
+      };
+
+      // Calculate rolling accuracy (for the chart)
+      const calculateRollingAccuracy = (historyData) => {
+        const result = [];
+        let correctCount = 0;
+        
+        for (let i = 0; i < historyData.length; i++) {
+          if (historyData[i].isCorrect) {
+            correctCount++;
+          }
+          // Calculate accuracy as percentage
+          const accuracy = ((correctCount / (i + 1)) * 100);
+          result.push(accuracy);
+        }
+        
+        return result;
+      };
+
+      // Update the chart
+      const updateChart = () => {
+        if (chartRef.current && history.length > 0) {
+          // Clear previous chart if it exists
+          if (chartInstance) {
+            chartInstance.destroy();
+          }
+
+          const ctx = chartRef.current.getContext('2d');
+          
+          // Take only the last 20 history items to avoid overcrowding
+          const recentHistory = history.slice(0, 20).reverse();
+          
+          // Prepare data for the chart
+          const labels = recentHistory.map((_, index) => `Q${index + 1}`);
+          const timeData = recentHistory.map(item => item.timeTaken);
+          const accuracyData = calculateRollingAccuracy(recentHistory);
+
+          const newChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: 'Time (seconds)',
+                  data: timeData,
+                  borderColor: '#87CEEB', /* Sky Blue */
+                  backgroundColor: 'rgba(135, 206, 235, 0.2)',
+                  yAxisID: 'y',
+                  tension: 0.4
+                },
+                {
+                  label: 'Accuracy (%)',
+                  data: accuracyData,
+                  borderColor: '#00BFFF', /* Deep Sky Blue */
+                  backgroundColor: 'rgba(0, 191, 255, 0.2)',
+                  yAxisID: 'y1',
+                  tension: 0.4
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: {
+                mode: 'index',
+                intersect: false,
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Time (seconds)',
+                    color: 'rgba(255, 255, 255, 0.87)'
+                  },
+                  grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                  },
+                  ticks: {
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }
+                },
+                y1: {
+                  beginAtZero: true,
+                  max: 100,
+                  position: 'right',
+                  title: {
+                    display: true,
+                    text: 'Accuracy (%)',
+                    color: 'rgba(255, 255, 255, 0.87)'
+                  },
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      return value + '%';
+                    },
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }
+                },
+                x: {
+                  grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                  },
+                  ticks: {
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    color: 'rgba(255, 255, 255, 0.87)'
+                  }
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.dataset.label || '';
+                      if (label) {
+                        label += ': ';
+                      }
+                      if (context.dataset.label === 'Accuracy (%)') {
+                        return label + context.parsed.y.toFixed(1) + '%';
+                      }
+                      return label + context.parsed.y.toFixed(1);
+                    }
+                  }
+                }
+              }
+            }
+          });
+          
+          setChartInstance(newChartInstance);
+        }
+      };
+
+      // Effect to update chart when tab changes or history updates
+      useEffect(() => {
+        if (activeTab === 'stats' && history.length > 0) {
+          updateChart();
+        }
+      }, [activeTab, history]); 
+
+      // Effect to focus input when question changes
+      useEffect(() => {
+        if (inputRef.current && isGameStarted) {
+          inputRef.current.focus();
+        }
+      }, [multiplier, multiplicand, isGameStarted]);
+
+      // Calculate accuracy percentage
+      const accuracyPercentage = totalQuestions > 0 
+        ? Math.round((score / totalQuestions) * 100) 
+        : 0;
+
+      return (
+        <div className="app">
+          <header className="header">
+            <h1 className="header-title">Multiplication Master</h1>
+          </header>
+
+          <div className="container">
+            {isGameStarted ? (
+              <>
+                <div className="stats">
+                  <div className="stat-card">
+                    <div className="stat-value">{score}</div>
+                    <div className="stat-label">Score</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{accuracyPercentage}%</div>
+                    <div className="stat-label">Accuracy</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{averageTime.toFixed(1)}s</div>
+                    <div className="stat-label">Avg Time</div>
+                  </div>
+                </div>
+
+                <div className="tab-container">
+                  <div className="tab-buttons">
+                    <button 
+                      className={`tab-button ${activeTab === 'game' ? 'active' : ''}`} 
+                      onClick={() => setActiveTab('game')}
+                    >
+                      Game
+                    </button>
+                    <button 
+                      className={`tab-button ${activeTab === 'stats' ? 'active' : ''}`} 
+                      onClick={() => setActiveTab('stats')}
+                    >
+                      Stats
+                    </button>
+                    <button 
+                      className={`tab-button ${activeTab === 'history' ? 'active' : ''}`} 
+                      onClick={() => setActiveTab('history')}
+                    >
+                      History
+                    </button>
+                  </div>
+
+                  <div className="tab-content">
+                    {activeTab === 'game' && (
+                      <div className="card fade-in">
+                        <div className="question-container">
+                          <div className="question">{multiplier} × {multiplicand} = ?</div>
+                          <form onSubmit={handleSubmit} className="user-input">
+                            <input
+                              ref={inputRef}
+                              type="text"
+                              className="input-field"
+                              value={userAnswer}
+                              onChange={handleInputChange}
+                              onKeyDown={handleKeyDown}
+                              placeholder="Your answer"
+                              autoFocus
+                            />
+                            <button type="submit" className="button button-primary">Submit</button>
+                          </form>
+                          <div className={`feedback ${feedbackClass}`}>{feedback}</div>
+                        </div>
+                        <div className="buttons">
+                          <button className="button button-danger" onClick={endGame}>
+                            End Game
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'stats' && (
+                      <div className="card fade-in">
+                        <div className="section-title">Performance Chart</div>
+                        <div className="stats">
+                          <div className="stat-card">
+                            <div className="stat-value">{totalQuestions}</div>
+                            <div className="stat-label">Total Questions</div>
+                          </div>
+                          <div className="stat-card">
+                            <div className="stat-value">{history.filter(item => item.isCorrect).length}</div>
+                            <div className="stat-label">Correct</div>
+                          </div>
+                          <div className="stat-card">
+                            <div className="stat-value">{history.filter(item => !item.isCorrect).length}</div>
+                            <div className="stat-label">Incorrect</div>
+                          </div>
+                        </div>
+                        <div className="chart-container">
+                          <canvas ref={chartRef}></canvas>
+                        </div>
+                        <div className="buttons">
+                          <button className="button button-primary" onClick={() => setActiveTab('game')}>
+                            Back to Game
+                          </button>
+                          <button className="button button-danger" onClick={resetStats}>
+                            Reset Stats
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'history' && (
+                      <div className="card fade-in">
+                        <div className="section-title">Question History</div>
+                        {history.length > 0 ? (
+                          <ul className="history-list">
+                            {history.map((item, index) => (
+                              <li key={index} className="history-item">
+                                <span className="history-question">
+                                  {item.question} = {item.correctAnswer}
+                                </span>
+                                <span className={`history-answer ${item.isCorrect ? 'correct' : 'incorrect'}`}>
+                                  Your answer: {item.userAnswer} ({item.timeTaken.toFixed(1)}s)
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>No history yet. Start answering questions!</p>
+                        )}
+                        <div className="buttons">
+                          <button className="button button-primary" onClick={() => setActiveTab('game')}>
+                            Back to Game
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="card fade-in">
+                <div className="section-title">Welcome to Multiplication Master!</div>
+                <p style={{ marginTop: '16px', marginBottom: '24px', lineHeight: '1.6', fontWeight: '500' }}>
+                  Practice multiplication tables from 12 to 29 (excluding 20) with factors from 2 to 9.
+                  Challenge yourself to improve your speed and accuracy!
+                </p>
+                
+                {totalQuestions > 0 && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div className="section-title">Your Progress</div>
+                    <div className="stats">
+                      <div className="stat-card">
+                        <div className="stat-value">{score}</div>
+                        <div className="stat-label">Total Score</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-value">{accuracyPercentage}%</div>
+                        <div className="stat-label">Accuracy</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-value">{averageTime.toFixed(1)}s</div>
+                        <div className="stat-label">Avg Time</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="buttons">
+                  <button className="button button-primary" onClick={startGame}>
+                    {totalQuestions > 0 ? 'Continue Practice' : 'Start Game'}
+                  </button>
+                  {totalQuestions > 0 && (
+                    <button className="button button-danger" onClick={resetStats}>
+                      Reset Stats
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // Render the app
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
